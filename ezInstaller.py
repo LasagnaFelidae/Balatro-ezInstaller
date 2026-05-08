@@ -278,10 +278,19 @@ class Installer(tk.Tk):
             self.pageSmods()
 
     def caniMoveThisOverHere(self):
-        folder = filedialog.askdirectory(title="Select Mods Folder", initialdir=self.mods_base)
-        if folder:
-            self.mods_base = Path(folder)
-            self.dir_var.set(str(self.mods_base))
+        new_folder = filedialog.askdirectory(
+            title="Select Mods Folder",
+            initialdir=self.mods_base
+        )
+
+        if not new_folder:
+            return
+
+        new_folder = Path(new_folder)
+
+        self.external_mods_dir = new_folder
+
+        self.dir_var.set(str(new_folder))
 
     def letmegetthatSmods(self, event=None):
         index = self.version_combo.current()
@@ -984,6 +993,7 @@ THIRD-PARTY LICENSES
         self.back_btn.config(state="disabled")
 
     def installConsole(self):
+        
         if self.installing:
             return
         self.after(0, lambda: self.next_btn.config(state="disabled"))
@@ -994,7 +1004,7 @@ THIRD-PARTY LICENSES
         
         sys.stdout = Installer.TextRedirector(self.log_box)
         sys.stderr = Installer.TextRedirector(self.log_box)
-
+        external_mods = getattr(self, "external_mods_dir", None)
         try:
             print("STEP: Checking game state")
             if balala():
@@ -1021,6 +1031,31 @@ THIRD-PARTY LICENSES
                 time.sleep(2)
 
             if self.choice in [2, 3]:
+                print("STEP: Setting up Mods directory link")
+
+                appdata_mods = Path(os.getenv("APPDATA")) / "Balatro" / "Mods"
+                external_mods = getattr(self, "external_mods_dir", None)
+
+                if external_mods:
+                    try:
+                        print(f"INFO: Linking {appdata_mods} to {external_mods}")
+
+                        if appdata_mods.exists() or appdata_mods.is_symlink():
+                            if appdata_mods.is_dir():
+                                shutil.rmtree(appdata_mods, ignore_errors=True)
+                            else:
+                                appdata_mods.unlink()
+
+                        os.makedirs(appdata_mods.parent, exist_ok=True)
+
+                        os.system(f'mklink /J "{appdata_mods}" "{external_mods}"')
+
+                        self.mods_base = external_mods
+
+                        print("SUCCESS: Mods directory linked")
+
+                    except Exception as e:
+                        print(f"ERROR: Failed to create Mods symbiotic link: {e}")
                 print("STEP: Installing Steamodded")
                 print("INFO: Fetching latest release metadata")
                 
