@@ -20,11 +20,11 @@ import time
 def balala():
     try:
         output = subprocess.check_output(
-            ["wmic", "process", "get", "name"],
+            ["tasklist"],
             creationflags=subprocess.CREATE_NO_WINDOW
         ).decode(errors="ignore").lower()
 
-        return any(line.strip() == "balatro.exe" for line in output)
+        return "balatro.exe" in output
     except:
         return False
     
