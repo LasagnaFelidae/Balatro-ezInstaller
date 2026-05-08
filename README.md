@@ -1,5 +1,6 @@
 # Balatro-ezInstaller
 Easy user-friendly installer option to setup Balatro Modding (Lovely+SMODS) for Windows
+Selects latest by default, allows the option to 
 
 ## How to install
 
