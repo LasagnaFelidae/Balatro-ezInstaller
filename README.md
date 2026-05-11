@@ -18,4 +18,7 @@ Selects latest by default, allows the option to have a different location for th
 * you need internet
 * make sure balatro is installed and not running
 
+## why is there no mac or linux option?
+because i dont want to put out code i can't test lol
+
 
